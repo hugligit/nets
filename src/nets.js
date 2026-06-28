@@ -1,16 +1,14 @@
 import * as THREE from 'three';
 import { normalMaterial, phongMaterial } from './materials.js';
 import { setModel, update, setScrub } from './modelController.js';
+import { MODELS } from './modelCatalog.js';
 
-
-
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 import Stats from 'three/addons/libs/stats.module.js';
 
+// SCENE {{{
 const clock = new THREE.Clock();
-let importedMaterial;
 
 const params = {
   debug: false, 
@@ -27,39 +25,10 @@ const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.inner
 const stats = new Stats();
 const renderer = new THREE.WebGLRenderer({  antialias: true });
 const controls = new OrbitControls( camera, renderer.domElement );
-const loader = new GLTFLoader();
-
 renderer.setSize( window.innerWidth, window.innerHeight );
 renderer.setAnimationLoop( animate );
 document.body.appendChild( renderer.domElement );
 document.body.appendChild(stats.dom);
-
-
-// let mixer;
-// let action;
-// let clip;
-// let model;
-
-async function init() {
-  await setModel('/three/unwrap2.glb', scene);
-}
-
-
-function animate( time ) {
-  controls.update();
-  stats.update();
-  renderer.render( scene, camera );
-  const delta = clock.getDelta();
-  update(delta);
-}
-
-
-
-init();
-
-
-
-// SCENE {{{
 const light = new THREE.SpotLight(0xffffff, 100);
 const light2 = new THREE.SpotLight(0xffffff, 100);
 const axesHelper = new THREE.AxesHelper(10);
@@ -91,6 +60,8 @@ light.add(lightHelper);
 light2.add(lightHelper2);
 scene.add(axesHelper);
 scene.add(floorGrid);
+
+let importedMaterial;
 // }}}
 
 // GUI {{{
@@ -145,9 +116,16 @@ gui.add(params, "restore").name("Restore");
 gui.open();
 // }}}
 
+init();
 
-
-function updateMaterial(name) {
+function animate( time ) { // {{{
+  controls.update();
+  stats.update();
+  renderer.render( scene, camera );
+  const delta = clock.getDelta();
+  update(delta);
+} // }}}
+function updateMaterial(name) { // {{{
   // m = model.children[0].children[0] //.material
   let m = model.children[0].children[0] //.material
   console.log(m);
@@ -166,4 +144,8 @@ function updateMaterial(name) {
       break;
 
   }
-}
+} // }}}
+async function init() { // {{{
+  // await setModel(MODELS.unwrap, scene);
+  await setModel(MODELS.monkey, scene);
+} // }}}
