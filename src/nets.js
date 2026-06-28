@@ -1,6 +1,7 @@
 import * as THREE from 'three';
-import { setModel, update, setScrub, setMaterial } from './modelController.js';
+import { setModel, update, setScrub, setMaterial, getState } from './modelController.js';
 import { MODELS } from './modelCatalog.js';
+import { createInspector, updateInspector } from './inspector.js';
 
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
@@ -116,6 +117,7 @@ gui.open();
 // }}}
 
 init();
+createInspector();
 
 function animate( time ) { // {{{
   controls.update();
@@ -123,6 +125,7 @@ function animate( time ) { // {{{
   renderer.render( scene, camera );
   const delta = clock.getDelta();
   update(delta);
+  updateInspector(getState());
 } // }}}
 // function setMaterial(name) { // {{{
 //   // m = model.children[0].children[0] //.material

@@ -80,3 +80,14 @@ export function setMaterial(name) { // {{{
             break;
     }
 } // }}}
+
+export function getState() { // {{{
+  return {
+    // model: currentModelName,
+    mesh: targetMesh ? targetMesh.name : null,
+    scrub: scrubMode,
+    // material: currentMaterialName,
+    clip: clip ? clip.name : null,
+    time: action ? action.time : 0
+  };
+} // }}}
