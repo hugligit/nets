@@ -1,6 +1,5 @@
 import * as THREE from 'three';
-import { normalMaterial, phongMaterial } from './materials.js';
-import { setModel, update, setScrub } from './modelController.js';
+import { setModel, update, setScrub, setMaterial } from './modelController.js';
 import { MODELS } from './modelCatalog.js';
 
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -110,7 +109,7 @@ fCamera.add(camera.rotation, "x", -20, 20, 0.1).listen();
 fCamera.add(camera.rotation, "y", -20, 20, 0.1).listen();
 fCamera.add(camera.rotation, "z", -20, 20, 0.1).listen();
 
-fMaterial.add(params, "material", ["Imported", "Internal", "Phong"]).onChange(updateMaterial);
+fMaterial.add(params, "material", ["Imported", "Internal", "Phong"]).onChange(setMaterial);
 
 gui.add(params, "restore").name("Restore");
 gui.open();
@@ -125,26 +124,26 @@ function animate( time ) { // {{{
   const delta = clock.getDelta();
   update(delta);
 } // }}}
-function updateMaterial(name) { // {{{
-  // m = model.children[0].children[0] //.material
-  let m = model.children[0].children[0] //.material
-  console.log(m);
-  switch (name) {
-
-    case 'Imported':
-      m.material = importedMaterial;
-      break;
-
-    case 'Internal':
-      m.material = normalMaterial;
-      break;
-
-    case 'Phong':
-      m.material = phongMaterial;
-      break;
-
-  }
-} // }}}
+// function setMaterial(name) { // {{{
+//   // m = model.children[0].children[0] //.material
+//   let m = model.children[0].children[0] //.material
+//   console.log(m);
+//   switch (name) {
+//
+//     case 'Imported':
+//       m.material = importedMaterial;
+//       break;
+//
+//     case 'Internal':
+//       m.material = normalMaterial;
+//       break;
+//
+//     case 'Phong':
+//       m.material = phongMaterial;
+//       break;
+//
+//   }
+// } // }}}
 async function init() { // {{{
   // await setModel(MODELS.unwrap, scene);
   await setModel(MODELS.monkey, scene);
