@@ -9,7 +9,8 @@ let action = null;
 let clip = null;
 let scrubMode = false;
 let importedMaterial = null;
-
+let currentModelName = null;
+let currentMaterialName = null;
 
 export async function setModel(url, scene) { // {{{
   // remove old model
@@ -17,9 +18,17 @@ export async function setModel(url, scene) { // {{{
     scene.remove(model);
   }
 
+  if(!currentMaterialName){
+    currentMaterialName = 'Imported';
+  }
+
+
   const gltf = await loadModel(url);
 
   model = gltf.scene;
+
+  currentModelName = url; // or better: catalog key later
+  targetMesh = null;
 
   model.traverse(child => {
     if (!targetMesh && child.isMesh) {
@@ -29,8 +38,8 @@ export async function setModel(url, scene) { // {{{
 
 
 
-  // importedMaterial = model.children[0].children[0].material;
   importedMaterial = targetMesh.material;
+  setMaterial(currentMaterialName);
   scene.add(model);
 
   clip = gltf.animations[0];
@@ -61,32 +70,32 @@ export function setScrub(t) { // {{{
 } // }}}
 
 export function setMaterial(name) { // {{{
+  if (!targetMesh) return;
 
-    if (!model) return;
+  if (name === 'Imported') {
+    targetMesh.material = importedMaterial;
+    currentMaterialName = name;
+    return;
+  }
+
+  const mat = materials[name];
+
+  if (!mat) return;
+
+  targetMesh.material = mat;
 
 
-    switch (name) {
 
-        case 'Imported':
-            targetMesh.material = importedMaterial;
-            break;
+  currentMaterialName = name;
 
-        case 'Internal':
-            targetMesh.material = materials.normal;
-            break;
-
-        case 'Phong':
-            targetMesh.material = materials.phong;
-            break;
-    }
 } // }}}
 
 export function getState() { // {{{
   return {
-    // model: currentModelName,
+    model: currentModelName,
     mesh: targetMesh ? targetMesh.name : null,
     scrub: scrubMode,
-    // material: currentMaterialName,
+    material: currentMaterialName,
     clip: clip ? clip.name : null,
     time: action ? action.time : 0
   };

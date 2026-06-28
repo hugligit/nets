@@ -2,23 +2,37 @@ import * as THREE from 'three';
 import { setModel, update, setScrub, setMaterial, getState } from './modelController.js';
 import { MODELS } from './modelCatalog.js';
 import { createInspector, updateInspector } from './inspector.js';
+import { createGUI } from './gui.js';
+import { materials } from './materials.js';
 
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 import Stats from 'three/addons/libs/stats.module.js';
+
+
+const params = {
+    model: 'unwrap',
+    material: 'Imported',
+    unfold: 0,
+
+    onModelChange: (name) => {
+        setModel(MODELS[name], scene);
+    }
+};
+
+createGUI(params, materials, MODELS);
 
 // SCENE {{{
 const clock = new THREE.Clock();
 
-const params = {
-  debug: false, 
-  range: 0.0, 
-  colour: 0xa7abb9,
-  unfold: 0,
-  light1Angle: 25,
-  restore: () => { camera.position.set(1, 3, -6); },
-  material: "Imported",
-}
+// const params = {
+//   debug: false, 
+//   range: 0.0, 
+//   colour: 0xa7abb9,
+//   unfold: 0,
+//   light1Angle: 25,
+//   restore: () => { camera.position.set(1, 3, -6); },
+//   material: "Imported",
+// }
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(params.colour);
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
@@ -64,57 +78,57 @@ scene.add(floorGrid);
 let importedMaterial;
 // }}}
 
-// GUI {{{
-const gui = new GUI();
-
-gui.add(params, 'unfold', 0, 1, 0.001)
-  .onChange(v => {
-    // action.time = val * clip.duration;
-    // mixer.update(0);
-    setScrub(v);
-  });
-const fView = gui.addFolder('View').close();
-const fLights = gui.addFolder('Lights').close();
-const fLight1 = fLights.addFolder('Light 1').close();
-const fLight2 = fLights.addFolder('Light 2').close();
-const fCamera = gui.addFolder('Camera').close();
-const fMaterial = gui.addFolder("Material").open();
-
-
-fView.add(floorGrid, "visible").name("Grid");
-fView.add(axesHelper, "visible").name("Axes");
-fView.addColor(params, "colour").name("background").onChange(value => {scene.background.set(value);});
-
-fLight1.add(lightHelper, "visible").name("Display");
-fLight1.add(light, 'intensity', 0, 500);
-fLight1.add(light, 'penumbra', 0, 1, 0.01);
-fLight1.add(params, "light1Angle", 5, 45, 1).name("Angle")
-  .onChange(v => {
-    light.angle = Math.PI * v / 180;
-    lightHelper.update();
-  });
-
-fLight2.add(lightHelper2, "visible").name("Display");
-fLight2.add(light2, 'intensity', 0, 500);
-fLight2.add(light2, 'penumbra', 0, 1, 0.01);
-fLight2.add(params, "light1Angle", 5, 45, 1).name("Angle")
-  .onChange(v => {
-    light2.angle = Math.PI * v / 180;
-    lightHelper2.update();
-  });
-
-fCamera.add(camera.position, "x", -20, 20, 0.1).listen();
-fCamera.add(camera.position, "y", -20, 20, 0.1).listen();
-fCamera.add(camera.position, "z", -20, 20, 0.1).listen();
-fCamera.add(camera.rotation, "x", -20, 20, 0.1).listen();
-fCamera.add(camera.rotation, "y", -20, 20, 0.1).listen();
-fCamera.add(camera.rotation, "z", -20, 20, 0.1).listen();
-
-fMaterial.add(params, "material", ["Imported", "Internal", "Phong"]).onChange(setMaterial);
-
-gui.add(params, "restore").name("Restore");
-gui.open();
-// }}}
+// // GUI {{{
+// const gui = new GUI();
+//
+// gui.add(params, 'unfold', 0, 1, 0.001)
+//   .onChange(v => {
+//     // action.time = val * clip.duration;
+//     // mixer.update(0);
+//     setScrub(v);
+//   });
+// const fView = gui.addFolder('View').close();
+// const fLights = gui.addFolder('Lights').close();
+// const fLight1 = fLights.addFolder('Light 1').close();
+// const fLight2 = fLights.addFolder('Light 2').close();
+// const fCamera = gui.addFolder('Camera').close();
+// const fMaterial = gui.addFolder("Material").open();
+//
+//
+// fView.add(floorGrid, "visible").name("Grid");
+// fView.add(axesHelper, "visible").name("Axes");
+// fView.addColor(params, "colour").name("background").onChange(value => {scene.background.set(value);});
+//
+// fLight1.add(lightHelper, "visible").name("Display");
+// fLight1.add(light, 'intensity', 0, 500);
+// fLight1.add(light, 'penumbra', 0, 1, 0.01);
+// fLight1.add(params, "light1Angle", 5, 45, 1).name("Angle")
+//   .onChange(v => {
+//     light.angle = Math.PI * v / 180;
+//     lightHelper.update();
+//   });
+//
+// fLight2.add(lightHelper2, "visible").name("Display");
+// fLight2.add(light2, 'intensity', 0, 500);
+// fLight2.add(light2, 'penumbra', 0, 1, 0.01);
+// fLight2.add(params, "light1Angle", 5, 45, 1).name("Angle")
+//   .onChange(v => {
+//     light2.angle = Math.PI * v / 180;
+//     lightHelper2.update();
+//   });
+//
+// fCamera.add(camera.position, "x", -20, 20, 0.1).listen();
+// fCamera.add(camera.position, "y", -20, 20, 0.1).listen();
+// fCamera.add(camera.position, "z", -20, 20, 0.1).listen();
+// fCamera.add(camera.rotation, "x", -20, 20, 0.1).listen();
+// fCamera.add(camera.rotation, "y", -20, 20, 0.1).listen();
+// fCamera.add(camera.rotation, "z", -20, 20, 0.1).listen();
+//
+// fMaterial.add(params, "material", ["Imported", "Internal", "Phong"]).onChange(setMaterial);
+//
+// gui.add(params, "restore").name("Restore");
+// gui.open();
+// // }}}
 
 init();
 createInspector();
@@ -127,27 +141,7 @@ function animate( time ) { // {{{
   update(delta);
   updateInspector(getState());
 } // }}}
-// function setMaterial(name) { // {{{
-//   // m = model.children[0].children[0] //.material
-//   let m = model.children[0].children[0] //.material
-//   console.log(m);
-//   switch (name) {
-//
-//     case 'Imported':
-//       m.material = importedMaterial;
-//       break;
-//
-//     case 'Internal':
-//       m.material = normalMaterial;
-//       break;
-//
-//     case 'Phong':
-//       m.material = phongMaterial;
-//       break;
-//
-//   }
-// } // }}}
 async function init() { // {{{
-  // await setModel(MODELS.unwrap, scene);
-  await setModel(MODELS.monkey, scene);
+  await setModel(MODELS.unwrap, scene);
+  // await setModel(MODELS.monkey, scene);
 } // }}}
