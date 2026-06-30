@@ -97,6 +97,19 @@ export function getState() { // {{{
     scrub: scrubMode,
     material: currentMaterialName,
     clip: clip ? clip.name : null,
-    time: action ? action.time : 0
+    time: action ? action.time : 0,
+  };
+} // }}}
+
+// !!! Temporary: doesn't really belong here
+export function getRendererState(renderer) { // {{{
+  return {
+    drawCalls: renderer.info.render.calls,
+    triangles: renderer.info.render.triangles,
+    lines: renderer.info.render.lines,
+    points: renderer.info.render.triangles,
+    frame: renderer.info.render.frame,
+    geometries: renderer.info.memory.geometries,
+    textures: renderer.info.memory.textures,
   };
 } // }}}
