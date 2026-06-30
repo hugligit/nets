@@ -11,10 +11,67 @@ let scrubMode = false;
 let importedMaterial = null;
 let currentModelName = null;
 let currentMaterialName = null;
+const sharedMaterials = new Set(Object.values(materials));
 
 export async function setModel(url, scene) { // {{{
   // remove old model
   if (model) {
+
+    // model.traverse((object) => {
+    //
+    //   if (!object.isMesh) return;
+    //
+    //   object.geometry.dispose();
+    //
+    //   if (Array.isArray(object.material)) {
+    //     object.material.forEach(m => m.dispose());
+    //   } else {
+    //     object.material.dispose();
+    //   }
+    //
+    // });
+
+
+
+
+
+
+
+    model.traverse(object => {
+
+      if (!object.isMesh) return;
+
+      object.geometry.dispose();
+
+      const mats = Array.isArray(object.material)
+        ? object.material
+        : [object.material];
+
+      for (const material of mats) {
+
+        if (!sharedMaterials.has(material)) {
+          // material.dispose();
+          disposeMaterial(material);
+        }
+
+      }
+
+    });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     scene.remove(model);
   }
 
@@ -39,8 +96,7 @@ export async function setModel(url, scene) { // {{{
 
 
   importedMaterial = targetMesh.material;
-  setMaterial(currentMaterialName);
-  scene.add(model);
+  // console.log(importedMaterial.map.uuid);
 
   clip = gltf.animations[0];
 
@@ -112,4 +168,15 @@ export function getRendererState(renderer) { // {{{
     geometries: renderer.info.memory.geometries,
     textures: renderer.info.memory.textures,
   };
+} // }}}
+
+function disposeMaterial(material) { // {{{
+
+  for (const value of Object.values(material)) {
+    if (value && value.isTexture) {
+      value.dispose();
+    }
+  }
+
+  material.dispose();
 } // }}}
