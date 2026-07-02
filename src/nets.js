@@ -1,5 +1,6 @@
 // IMPORTS {{{
 import * as THREE from 'three';
+import { createAppCore } from './appCore.js';
 import { setModel, update, setScrub, setMaterial, getState, getRendererState } from './modelController.js';
 import { MODELS } from './modelCatalog.js';
 import { createInspector, updateInspector } from './inspector.js';
@@ -9,24 +10,21 @@ import { createLights } from './lights.js';
 import { createLightController } from './lightController.js';
 import { createViewController } from './viewController.js';
 
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import Stats from 'three/addons/libs/stats.module.js';
+// import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+// import Stats from 'three/addons/libs/stats.module.js';
 // }}}
 
-const params = { // {{{
-    model: 'unwrap',
-    material: 'Imported',
-    unfold: 0,
+// APP {{{
+const app = createAppCore();
+const {
+  scene,
+  camera,
+  renderer,
+  controls,
+  clock,
+  stats
+} = app; // }}}
 
-    onModelChange: (name) => {
-        setModel(MODELS[name], scene);
-    },
-  backgroundColour: 0x292929,
-  grid: false,
-  axes: false,
-  inspectorDisplay: true,
-  statsDisplay: true,
-}; // }}}
 const lightParams = { // {{{
 
   key: {
@@ -45,56 +43,25 @@ const lightParams = { // {{{
 
 }; // }}}
 
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-const stats = new Stats();
-const renderer = new THREE.WebGLRenderer({  antialias: true });
-const controls = new OrbitControls( camera, renderer.domElement );
-const clock = new THREE.Clock();
 
-
+// SCENE {{{
 const axesHelper = new THREE.AxesHelper(10);
 const floorGrid = new THREE.GridHelper(10, 10);
 floorGrid.visible = false;
 axesHelper.visible = false;
 scene.add(axesHelper);
 scene.add(floorGrid);
-// SCENE {{{
-
-renderer.setSize( window.innerWidth, window.innerHeight );
-renderer.setAnimationLoop( animate );
-document.body.appendChild( renderer.domElement );
-document.body.appendChild(stats.dom);
-
-
-
-camera.position.set(1, 3, -6);
-camera.lookAt(0, 0, 0);
-
 
 // }}}
 
-
-const view = createViewController(
-    scene,
-    floorGrid,
-    axesHelper
-);
-
-
-view.setBackground(params.backgroundColour);
-
 const lights = createLights(scene);
-const lightController = createLightController(lights);
 const inspector = createInspector();
+const lightController = createLightController(lights);
+const view = createViewController(scene, floorGrid, axesHelper);
 
-
-
-
-init();
+view.setBackground(0x292929);
 
 const gui = createGUI({ // {{{
-  params, 
   materials, 
   models: MODELS, 
   view,
@@ -105,20 +72,37 @@ const gui = createGUI({ // {{{
   lightParams,
   setMaterial,
   setScrub,
+  params: {
+    model: 'unwrap',
+    material: 'Imported',
+    unfold: 0,
+
+    onModelChange: (name) => {
+      setModel(MODELS[name], scene);
+    },
+    backgroundColour: 0x292929,
+    grid: false,
+    axes: false,
+    inspectorDisplay: true,
+    statsDisplay: true,
+  }, 
 }); // }}}
 
-function animate( time ) { // {{{
-  controls.update();
-  stats.update();
-  renderer.render( scene, camera );
-  const delta = clock.getDelta();
-  update(delta);
-  updateInspector({
-    ...getState(),
-    ...getRendererState(renderer),
-  });
-} // }}}
+init();
+
 async function init() { // {{{
   await setModel(MODELS.unwrap, scene);
   // await setModel(MODELS.monkey, scene);
+
+  renderer.setAnimationLoop(() => {
+    controls.update();
+    stats.update();
+    const delta = clock.getDelta();
+    update(delta);
+    renderer.render( scene, camera );
+    updateInspector({
+      ...getState(),
+      ...getRendererState(renderer),
+    });
+  });
 } // }}}
