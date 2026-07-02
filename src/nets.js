@@ -8,71 +8,53 @@ import { createGUI } from './gui.js';
 import { materials } from './materials.js';
 import { createLights } from './lights.js';
 import { createLightController } from './lightController.js';
-import { createViewController } from './viewController.js';
-
-// import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-// import Stats from 'three/addons/libs/stats.module.js';
+import { createViewSystem } from './viewSystem.js';
 // }}}
 
 // APP {{{
 const app = createAppCore();
-const {
-  scene,
-  camera,
-  renderer,
-  controls,
-  clock,
-  stats
-} = app; // }}}
 
-const lightParams = { // {{{
-
-  key: {
-    intensity: 100,
-    angle: 25,
-    penumbra: 1,
-    helper: false,
-  },
-
-  fill: {
-    intensity: 100,
-    angle: 18,
-    penumbra: 1,
-    helper: false,
-  },
-
-}; // }}}
-
-
-// SCENE {{{
-const axesHelper = new THREE.AxesHelper(10);
-const floorGrid = new THREE.GridHelper(10, 10);
-floorGrid.visible = false;
-axesHelper.visible = false;
-scene.add(axesHelper);
-scene.add(floorGrid);
+// const {
+//   scene,
+//   camera,
+//   renderer,
+//   controls,
+//   clock,
+//   stats
+// } = app; 
 
 // }}}
 
-const lights = createLights(scene);
+const lights = createLights(app.scene);
 const inspector = createInspector();
 const lightController = createLightController(lights);
-const view = createViewController(scene, floorGrid, axesHelper);
-
-view.setBackground(0x292929);
-
+const view = createViewSystem(app.scene);
 const gui = createGUI({ // {{{
   materials, 
   models: MODELS, 
   view,
   inspector,
-  stats,
+  stats: app.stats,
   lightController,
 
-  lightParams,
   setMaterial,
   setScrub,
-  params: {
+  lightParams: { // {{{
+    key: {
+      intensity: 100,
+      angle: 25,
+      penumbra: 1,
+      helper: false,
+    },
+
+    fill: {
+      intensity: 100,
+      angle: 18,
+      penumbra: 1,
+      helper: false,
+    },
+  }, // }}}
+  params: { // {{{
     model: 'unwrap',
     material: 'Imported',
     unfold: 0,
@@ -85,24 +67,24 @@ const gui = createGUI({ // {{{
     axes: false,
     inspectorDisplay: true,
     statsDisplay: true,
-  }, 
+  }, // }}}
 }); // }}}
 
 init();
 
 async function init() { // {{{
-  await setModel(MODELS.unwrap, scene);
+  await setModel(MODELS.unwrap, app.scene);
   // await setModel(MODELS.monkey, scene);
 
-  renderer.setAnimationLoop(() => {
-    controls.update();
-    stats.update();
-    const delta = clock.getDelta();
+  app.renderer.setAnimationLoop(() => {
+    app.controls.update();
+    app.stats.update();
+    const delta = app.clock.getDelta();
     update(delta);
-    renderer.render( scene, camera );
+    app.renderer.render( app.scene, app.camera );
     updateInspector({
       ...getState(),
-      ...getRendererState(renderer),
+      ...getRendererState(app.renderer),
     });
   });
 } // }}}
